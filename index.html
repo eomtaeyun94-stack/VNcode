@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNcode</title>
+<style>
+  body { font-family: Arial; background: #1e1e1e; color: #f0f0f0; margin: 0; padding: 0; }
+  header { background: #272727; padding: 15px; text-align: center; font-size: 24px; }
+  main { padding: 20px; }
+  input, select, textarea, button { display: block; margin: 10px 0; width: 100%; padding: 8px; }
+  textarea { height: 150px; background: #2c2c2c; color: #f0f0f0; border: 1px solid #555; }
+  .repo { background: #2c2c2c; padding: 10px; margin: 10px 0; border: 1px solid #555; }
+  .license { font-size: 12px; color: #aaa; margin-top: 5px; }
+  .page { display: none; }
+</style>
+</head>
+<body>
 
+<header>VNcode</header>
+
+<main>
+  <!-- 소개 페이지 -->
+  <div id="introPage" class="page" style="display:block;">
+    <h2>왜 VNcode인가?</h2>
+    <p>VNcode는 코드를 안전하게 저장하고, 필요 시 VN 라이선스를 적용하여 공유할 수 있는 플랫폼입니다.</p>
+    <p>예시: 오픈 소스 프로젝트, 개인 코드 저장, 라이선스 선택 가능</p>
+    <input type="text" id="username" placeholder="사용자 이름">
+    <button onclick="login()">로그인</button>
+  </div>
+
+  <!-- 메인 페이지 -->
+  <div id="mainPage" class="page">
+    <h2>저장소 생성</h2>
+    <input type="text" id="repoName" placeholder="저장소 이름">
+    <select id="license">
+      <option value="none">라이선스 없음</option>
+      <option value="VN">VN License</option>
+    </select>
+    <textarea id="code" placeholder="코드를 여기에 작성하세요"></textarea>
+    <button onclick="createRepo()">저장소 생성</button>
+
+    <h2>저장소 목록</h2>
+    <div id="repoList"></div>
+    <button onclick="logout()">로그아웃</button>
+  </div>
+</main>
+
+<script>
+  const repoList = [];
+
+  function login() {
+    const name = document.getElementById('username').value.trim();
+    if (!name) { alert("사용자 이름 입력"); return; }
+    localStorage.setItem('vncodeUser', name);
+    showMainPage();
+  }
+
+  function logout() {
+    localStorage.removeItem('vncodeUser');
+    showIntroPage();
+  }
+
+  function showMainPage() {
+    document.getElementById('introPage').style.display = 'none';
+    document.getElementById('mainPage').style.display = 'block';
+  }
+
+  function showIntroPage() {
+    document.getElementById('mainPage').style.display = 'none';
+    document.getElementById('introPage').style.display = 'block';
+  }
+
+  function createRepo() {
+    const name = document.getElementById('repoName').value.trim();
+    const license = document.getElementById('license').value;
+    const code = document.getElementById('code').value;
+    if (!name || !code) { alert("저장소 이름과 코드는 필수입니다."); return; }
+    const repo = { name, license, code };
+    repoList.push(repo);
+    renderRepos();
+    document.getElementById('repoName').value = '';
+    document.getElementById('code').value = '';
+  }
+
+  function renderRepos() {
+    const container = document.getElementById('repoList');
+    container.innerHTML = '';
+    repoList.forEach(repo => {
+      const div = document.createElement('div');
+      div.className = 'repo';
+      div.innerHTML = `
+        <strong>${repo.name}</strong>
+        <pre>${repo.code}</pre>
+        <div class="license">${repo.license === 'VN' ? 'VN License 적용' : '라이선스 없음'}</div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // 페이지 로드 시 로그인 상태 확인
+  window.onload = function() {
+    if (localStorage.getItem('vncodeUser')) {
+      showMainPage();
+    }
+  }
+</script>
+
+</body>
+</html>
